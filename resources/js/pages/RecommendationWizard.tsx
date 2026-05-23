@@ -250,7 +250,7 @@ export default function RecommendationWizard() {
               </div>
               <div className="flex justify-between pt-2 text-base font-bold">
                 <span className="text-gray-400">Total Price</span>
-                <span className="text-cyan-500 font-black text-2xl">{(totalDays * selectedCar?.price).toLocaleString()} MAD</span>
+                <span className="text-cyan-500 font-black text-2xl">{(totalDays * (selectedCar?.price ?? 0)).toLocaleString()} MAD</span>
               </div>
             </div>
 
@@ -507,7 +507,7 @@ export default function RecommendationWizard() {
                       <span className="text-gray-500 text-[10px] font-bold uppercase block">Total Price</span>
                       <span className="text-xs text-gray-400">{totalDays} days × {selectedCar?.price} MAD</span>
                     </div>
-                    <span className="text-cyan-500 font-black text-3xl">{(totalDays * selectedCar?.price).toLocaleString()} MAD</span>
+                    <span className="text-cyan-500 font-black text-3xl">{(totalDays * (selectedCar?.price ?? 0)).toLocaleString()} MAD</span>
                   </div>
 
                   <div className="flex items-center gap-3 text-cyan-500/80 bg-cyan-500/5 p-4 rounded-xl border border-cyan-500/10">

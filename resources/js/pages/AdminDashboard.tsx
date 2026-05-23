@@ -54,6 +54,7 @@ interface DashboardBooking {
   car?: {
     brand: string;
     model: string;
+    price_per_day?: string | number;
     image_path?: string | null;
   };
 }
@@ -159,7 +160,7 @@ export default function AdminDashboard() {
             ...c,
             name: c.model,
             type: c.category || 'Sedan',
-            price: parseInt(c.price_per_day),
+            price: parseInt(String(c.price_per_day)),
             image: c.image_path || getCarImage(c.brand, c.model)
           };
         });
@@ -316,11 +317,11 @@ export default function AdminDashboard() {
 
   // Stats Dynamic Calculation
   const stats = useMemo(() => {
-    const grossRevenue = bookings.reduce((sum, b) => sum + parseFloat(b.total_price || 0), 0);
+    const grossRevenue = bookings.reduce((sum, b) => sum + parseFloat(String(b.total_price || 0)), 0);
     const activeRentals = cars.filter(c => c.status === 'rented').length;
     const totalFleet = cars.length;
     const utilizationRate = totalFleet > 0 ? Math.round((activeRentals / totalFleet) * 100) : 0;
-    const uniqueUsersCount = bookings.reduce((acc, b) => {
+    const uniqueUsersCount = bookings.reduce((acc: number[], b) => {
       if (!acc.includes(b.user_id)) acc.push(b.user_id);
       return acc;
     }, []).length;
@@ -340,7 +341,7 @@ export default function AdminDashboard() {
       const date = new Date(b.created_at || b.start_date);
       const monthIdx = date.getMonth();
       if (monthIdx >= 0 && monthIdx < 6) {
-        monthlySum[monthIdx] += parseFloat(b.total_price || 0);
+        monthlySum[monthIdx] += parseFloat(String(b.total_price || 0));
       }
     });
     return monthlySum;
@@ -870,7 +871,7 @@ export default function AdminDashboard() {
                                   </div>
                                 </td>
                                 <td className="px-8 py-6 text-cyan-500 font-black text-sm">
-                                  {parseFloat(booking.total_price).toLocaleString()} MAD
+                                  {parseFloat(String(booking.total_price)).toLocaleString()} MAD
                                 </td>
                                 <td className="px-8 py-6">
                                   <span className={cn(

@@ -87,6 +87,7 @@ export default function CarDetailsPage() {
   };
 
   const handleReservation = async () => {
+    if (!car) return;
     if (!user) {
       setShowAuthModal(true);
       return;
