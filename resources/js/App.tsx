@@ -31,6 +31,27 @@ function Navbar() {
   const location = useLocation();
   const { user, logout, setShowAuthModal } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY <= 10) {
+        setVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        setVisible(false);
+        setIsOpen(false); // Close mobile menu when scrolling down
+      } else {
+        setVisible(true);
+      }
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navItems = [
     { name: t('nav.home'), path: '/' },
@@ -48,7 +69,10 @@ function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
+    <nav className={cn(
+      "fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/10 transition-transform duration-300",
+      visible ? "translate-y-0" : "-translate-y-full"
+    )}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 md:h-24">
           <Link to="/" className="flex items-center group relative z-10">
