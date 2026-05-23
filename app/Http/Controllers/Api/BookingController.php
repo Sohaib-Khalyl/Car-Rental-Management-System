@@ -9,6 +9,9 @@ class BookingController extends Controller
 {
     public function index(Request $request)
     {
+        if ($request->user()->isAdmin()) {
+            return response()->json(\App\Models\Booking::with(['car', 'user'])->latest()->get());
+        }
         return response()->json($request->user()->bookings()->with('car')->get());
     }
 
@@ -38,4 +41,22 @@ class BookingController extends Controller
 
         return response()->json($booking, 201);
     }
+
+    public function updateStatus(Request $request, \App\Models\Booking $booking)
+    {
+        if (!$request->user()->isAdmin()) {
+            return response()->json(['message' => 'Unauthorized access.'], 403);
+        }
+
+        $validated = $request->validate([
+            'status' => 'required|string|in:pending,approved,rejected,cancelled',
+        ]);
+
+        $booking->update([
+            'status' => $validated['status']
+        ]);
+
+        return response()->json($booking->load(['car', 'user']));
+    }
 }
+

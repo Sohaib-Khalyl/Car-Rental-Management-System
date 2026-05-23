@@ -22,4 +22,13 @@ Route::post('/recommendations', [RecommendationController::class, 'generate']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store']);
     Route::get('/bookings', [BookingController::class, 'index']);
+    Route::put('/bookings/{booking}/status', [BookingController::class, 'updateStatus']);
+
+    Route::post('/cars', [CarController::class, 'store']);
+    Route::put('/cars/{car}', [CarController::class, 'update']);
+    Route::delete('/cars/{car}', [CarController::class, 'destroy']);
+
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
+

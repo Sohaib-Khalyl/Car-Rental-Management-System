@@ -18,6 +18,7 @@ i18n
             cars: 'Browse Cars',
             wizard: 'Smart AI',
             dashboard: 'Dashboard',
+            profile: 'Profile',
           },
           hero: {
             title: 'Drive the Future',
@@ -33,6 +34,7 @@ i18n
             cars: 'Parcourir',
             wizard: 'IA Intelligente',
             dashboard: 'Tableau de bord',
+            profile: 'Profil',
           },
           hero: {
             title: 'Conduisez le futur',
@@ -48,6 +50,7 @@ i18n
             cars: 'تصفح السيارات',
             wizard: 'الذكاء الاصطناعي',
             dashboard: 'لوحة التحكم',
+            profile: 'الملف الشخصي',
           },
           hero: {
             title: 'قد المستقبل',

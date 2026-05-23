@@ -4,60 +4,56 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\File;
 
 class CarSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('cars')->insert([
-            [
-                'brand' => 'Tesla',
-                'model' => 'Model S Plaid',
-                'year' => 2024,
-                'price_per_day' => 199.99,
-                'fuel_type' => 'Electric',
-                'passenger_capacity' => 5,
-                'luggage_capacity' => 2,
-                'status' => 'available',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'brand' => 'Porsche',
-                'model' => '911 GT3',
-                'year' => 2023,
-                'price_per_day' => 450.00,
-                'fuel_type' => 'Gasoline',
-                'passenger_capacity' => 2,
-                'luggage_capacity' => 1,
-                'status' => 'available',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'brand' => 'Mercedes-Benz',
-                'model' => 'S-Class',
-                'year' => 2024,
-                'price_per_day' => 350.00,
-                'fuel_type' => 'Hybrid',
-                'passenger_capacity' => 5,
-                'luggage_capacity' => 3,
-                'status' => 'available',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'brand' => 'BMW',
-                'model' => 'X7',
-                'year' => 2024,
-                'price_per_day' => 280.00,
-                'fuel_type' => 'Gasoline',
-                'passenger_capacity' => 7,
-                'luggage_capacity' => 4,
-                'status' => 'available',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        // Safely disable foreign key checks to truncate all related tables
+        Schema::disableForeignKeyConstraints();
+        DB::table('bookings')->truncate();
+        DB::table('favorites')->truncate();
+        DB::table('reviews')->truncate();
+        DB::table('pricing_rules')->truncate();
+        DB::table('cars')->truncate();
+        Schema::enableForeignKeyConstraints();
+
+        // Load scraped car data from JSON
+        $jsonPath = database_path('seeders/cars_data.json');
+        if (!File::exists($jsonPath)) {
+            $this->command->error("Seeder data file not found at: {$jsonPath}");
+            return;
+        }
+
+        $carsData = json_decode(File::get($jsonPath), true);
+        if (empty($carsData)) {
+            $this->command->error("No cars data found in: {$jsonPath}");
+            return;
+        }
+
+        $now = now();
+        $carsToInsert = [];
+
+        foreach ($carsData as $car) {
+            $carsToInsert[] = [
+                'brand' => $car['brand'],
+                'model' => $car['model'],
+                'year' => $car['year'] ?? 2024,
+                'price_per_day' => $car['price_per_day'],
+                'fuel_type' => $car['fuel_type'],
+                'passenger_capacity' => $car['passenger_capacity'],
+                'luggage_capacity' => $car['luggage_capacity'],
+                'status' => $car['status'] ?? 'available',
+                'image_path' => $car['image_path'] ?? null,
+                'description' => $car['description'] ?? null,
+                'category' => $car['category'] ?? null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        DB::table('cars')->insert($carsToInsert);
     }
 }

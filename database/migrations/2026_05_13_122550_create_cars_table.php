@@ -16,7 +16,7 @@ return new class extends Migration
             $table->decimal('price_per_day', 8, 2);
             $table->string('fuel_type');
             $table->integer('passenger_capacity');
-            $table->integer('luggage_capacity');
+            $table->string('luggage_capacity');
             $table->string('status')->default('available');
             $table->timestamps();
         });

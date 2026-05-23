@@ -19,6 +19,9 @@ class Car extends Model
         'passenger_capacity',
         'luggage_capacity',
         'status',
+        'image_path',
+        'description',
+        'category',
     ];
 
     public function bookings(): HasMany

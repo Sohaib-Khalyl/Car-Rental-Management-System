@@ -23,6 +23,7 @@ import {
 import { cn } from './lib/utils';
 import './i18n';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import AuthModal from './components/AuthModal';
 
 // Pages (to be implemented)
@@ -30,7 +31,7 @@ import LandingPage from './pages/LandingPage';
 import CarListingPage from './pages/CarListingPage';
 import CarDetailsPage from './pages/CarDetailsPage';
 import RecommendationWizard from './pages/RecommendationWizard';
-import UserDashboard from './pages/UserDashboard';
+import UserProfile from './pages/UserProfile';
 import AdminDashboard from './pages/AdminDashboard';
 
 function Navbar() {
@@ -38,28 +39,33 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { user, logout, setShowAuthModal } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   const navItems = [
     { name: t('nav.home'), path: '/' },
     { name: t('nav.cars'), path: '/cars' },
-    { name: t('nav.dashboard'), path: '/dashboard' },
   ];
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-    document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = lng;
-  };
+  if (user) {
+    if (user.role === 'admin') {
+      navItems.push({ name: t('nav.dashboard'), path: '/admin' });
+    } else {
+      navItems.push({ name: t('nav.profile'), path: '/profile' });
+    }
+  } else {
+    navItems.push({ name: t('nav.profile'), path: '/profile' });
+  }
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
-              <Zap className="text-black w-6 h-6 fill-current" />
-            </div>
-            <span className="text-2xl font-bold tracking-tighter text-white">TEIMA <span className="text-cyan-500">CARS</span></span>
+        <div className="flex items-center justify-between h-20 md:h-24">
+          <Link to="/" className="flex items-center group relative z-10">
+            <img 
+              src={theme === 'dark' ? '/images/logoWhite.png' : '/images/logoDark.png'} 
+              className="h-24 md:h-32 w-auto object-contain transition-all duration-300 py-1 drop-shadow-2xl" 
+              alt="Teima Cars Logo" 
+            />
           </Link>
 
           <div className="hidden md:flex items-center space-x-8">
@@ -78,23 +84,24 @@ function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <div className="flex items-center bg-white/5 rounded-full p-1 border border-white/10">
-              {['en', 'fr', 'ar'].map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => changeLanguage(lang)}
-                  className={cn(
-                    "px-3 py-1 rounded-full text-xs font-bold transition-all uppercase",
-                    i18n.language === lang ? "bg-cyan-500 text-black" : "text-gray-400 hover:text-white"
-                  )}
-                >
-                  {lang}
-                </button>
-              ))}
-            </div>
+            {/* Theme Toggle Button */}
+            <button 
+              onClick={toggleTheme} 
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all duration-300 border border-white/10"
+              aria-label="Toggle Theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-yellow-400 fill-yellow-400/20" />
+              ) : (
+                <Moon className="w-4 h-4 text-indigo-500 fill-indigo-500/20" />
+              )}
+            </button>
+
             {user ? (
               <div className="flex items-center space-x-4">
-                <span className="text-xs font-bold text-cyan-500 uppercase tracking-widest hidden lg:block">{user.name}</span>
+                <Link to={user.role === 'admin' ? '/admin' : '/profile'} className="text-xs font-bold text-cyan-500 hover:text-cyan-400 transition-colors uppercase tracking-widest hidden lg:block">
+                  {user.name}
+                </Link>
                 <button onClick={logout} className="text-xs font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest">
                   Logout
                 </button>
@@ -106,8 +113,20 @@ function Navbar() {
             )}
           </div>
 
-          <div className="md:hidden">
-            <button onClick={() => setIsOpen(!isOpen)} className="text-white">
+          <div className="flex md:hidden items-center space-x-3">
+            {/* Mobile Theme Toggle Button */}
+            <button 
+              onClick={toggleTheme} 
+              className="p-2 rounded-full bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-all"
+              aria-label="Toggle Theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-yellow-400 fill-yellow-400/20" />
+              ) : (
+                <Moon className="w-4 h-4 text-indigo-500 fill-indigo-500/20" />
+              )}
+            </button>
+            <button onClick={() => setIsOpen(!isOpen)} className="text-white p-1">
               {isOpen ? <X /> : <Menu />}
             </button>
           </div>
@@ -143,15 +162,21 @@ function Navbar() {
 }
 
 function Footer() {
+  const { theme } = useTheme();
+  const { user } = useAuth();
+
   return (
     <footer className="bg-black border-t border-white/10 py-12">
-      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div className="col-span-1 md:col-span-1">
-          <div className="flex items-center space-x-2 mb-4">
-            <Zap className="text-cyan-500 w-6 h-6" />
-            <span className="text-xl font-bold text-white uppercase tracking-wider">Teima Cars</span>
+      <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="col-span-1 md:col-span-2">
+          <div className="flex items-center mb-4">
+            <img 
+              src={theme === 'dark' ? '/images/logoWhite.png' : '/images/logoDark.png'} 
+              className="h-8 w-auto object-contain" 
+              alt="Teima Cars Logo" 
+            />
           </div>
-          <p className="text-gray-500 text-sm leading-relaxed">
+          <p className="text-gray-500 text-sm leading-relaxed max-w-md">
             Revolutionizing urban mobility with premium AI-driven rental solutions. Experience the peak of automotive technology.
           </p>
         </div>
@@ -159,18 +184,11 @@ function Footer() {
           <h4 className="text-white font-bold mb-4">Platform</h4>
           <ul className="space-y-2 text-sm text-gray-500">
             <li><Link to="/cars" className="hover:text-cyan-500 transition-colors">Browse Fleet</Link></li>
-            <li><Link to="/pricing" className="hover:text-cyan-500 transition-colors">Pricing</Link></li>
+            {user && (
+              <li><Link to="/profile" className="hover:text-cyan-500 transition-colors">Profile</Link></li>
+            )}
           </ul>
         </div>
-        <div>
-          <h4 className="text-white font-bold mb-4">Support</h4>
-          <ul className="space-y-2 text-sm text-gray-500">
-            <li><a href="#" className="hover:text-cyan-500 transition-colors">Help Center</a></li>
-            <li><a href="#" className="hover:text-cyan-500 transition-colors">Safety</a></li>
-            <li><a href="#" className="hover:text-cyan-500 transition-colors">Terms of Service</a></li>
-          </ul>
-        </div>
-
       </div>
       <div className="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-white/5 text-center text-gray-600 text-xs">
         &copy; {new Date().getFullYear()} Teima Cars. All rights reserved.
@@ -179,28 +197,42 @@ function Footer() {
   );
 }
 
+function AppContent() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return (
+    <div className="min-h-screen bg-[#050505] text-white selection:bg-cyan-500/30 selection:text-cyan-500 transition-colors duration-300">
+      <Navbar />
+      <AuthModal />
+      <main className="pt-20 md:pt-24 min-h-[calc(100vh-80px)] md:min-h-[calc(100vh-96px)]">
+        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Zap className="animate-pulse text-cyan-500 w-12 h-12" /></div>}>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/cars" element={<CarListingPage />} />
+            <Route path="/cars/:id" element={<CarDetailsPage />} />
+            <Route path="/wizard" element={<RecommendationWizard />} />
+            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Routes>
+        </Suspense>
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-cyan-500/30 selection:text-cyan-500">
-          <Navbar />
-          <AuthModal />
-          <main className="pt-20 min-h-[calc(100vh-80px)]">
-          <Suspense fallback={<div className="h-screen w-full flex items-center justify-center"><Zap className="animate-pulse text-cyan-500 w-12 h-12" /></div>}>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/cars" element={<CarListingPage />} />
-              <Route path="/cars/:id" element={<CarDetailsPage />} />
-              <Route path="/wizard" element={<RecommendationWizard />} />
-              <Route path="/dashboard" element={<UserDashboard />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-            </Routes>
-          </Suspense>
-        </main>
-        <Footer />
-      </div>
-      </Router>
+      <ThemeProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </ThemeProvider>
     </AuthProvider>
   );
 }
