@@ -19,15 +19,26 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getCarImage } from '../lib/carImages';
 
-
+interface WizardCar {
+  id: number;
+  name: string;
+  brand: string;
+  type: string;
+  price: number;
+  fuelType: string;
+  passengers: number;
+  transmission: string;
+  rating: number;
+  status: string;
+  image: string;
+}
 
 export default function RecommendationWizard() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { user, setShowAuthModal, token } = useAuth();
 
   // Initial Step logic: if start and end dates are in URL, go straight to Step 2 (Vehicle Grid)
@@ -40,8 +51,8 @@ export default function RecommendationWizard() {
   const [endDate, setEndDate] = useState(initialEnd);
   const [category, setCategory] = useState(initialCategory);
   
-  const [selectedCar, setSelectedCar] = useState<any>(null);
-  const [fleet, setFleet] = useState<any[]>([]);
+  const [selectedCar, setSelectedCar] = useState<WizardCar | null>(null);
+  const [fleet, setFleet] = useState<WizardCar[]>([]);
   const [loadingFleet, setLoadingFleet] = useState(false);
 
   // Form Fields State
@@ -70,7 +81,18 @@ export default function RecommendationWizard() {
     fetch('/api/cars')
       .then(res => res.json())
       .then(data => {
-        const mapped = data.map((c: any) => ({
+        const mapped = data.map((c: {
+          id: number;
+          model: string;
+          brand: string;
+          category: string;
+          price_per_day: string;
+          fuel_type: string;
+          passenger_capacity: number;
+          status: string;
+          image_path: string | null;
+          description?: string;
+        }) => ({
           id: c.id,
           name: c.model,
           brand: c.brand,
@@ -113,7 +135,7 @@ export default function RecommendationWizard() {
     setStep(2);
   };
 
-  const handleSelectCar = (car: any) => {
+  const handleSelectCar = (car: WizardCar) => {
     setSelectedCar(car);
     setStep(3);
   };

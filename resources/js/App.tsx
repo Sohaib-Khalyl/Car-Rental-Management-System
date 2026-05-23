@@ -3,26 +3,17 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Car, 
-  LayoutDashboard, 
-  Search, 
-  MapPin, 
-  Calendar, 
   User, 
-  Settings, 
   Menu, 
   X, 
-  Globe, 
   Moon, 
   Sun,
-  ChevronRight,
-  ShieldCheck,
-  Zap,
-  Clock
+  Zap
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import './i18n';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import './contexts/ThemeContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import AuthModal from './components/AuthModal';
 
@@ -35,7 +26,7 @@ import UserProfile from './pages/UserProfile';
 import AdminDashboard from './pages/AdminDashboard';
 
 function Navbar() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { user, logout, setShowAuthModal } = useAuth();

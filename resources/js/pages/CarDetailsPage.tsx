@@ -19,13 +19,27 @@ import { getCarImage } from '../lib/carImages';
 import { cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
 
+interface DetailsCar {
+  id: number;
+  brand: string;
+  model: string;
+  year: number;
+  price_per_day: string;
+  fuel_type: string;
+  passenger_capacity: number;
+  luggage_capacity: number;
+  status: string;
+  image_path: string | null;
+  description: string;
+}
+
 export default function CarDetailsPage() {
   const { id } = useParams();
   const { user, token, setShowAuthModal } = useAuth();
 
-  const [car, setCar] = useState<any>(null);
+  const [car, setCar] = useState<DetailsCar | null>(null);
   const [loading, setLoading] = useState(true);
-  const [relatedCars, setRelatedCars] = useState<any[]>([]);
+  const [relatedCars, setRelatedCars] = useState<DetailsCar[]>([]);
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -56,7 +70,7 @@ export default function CarDetailsPage() {
       .then(res => res.json())
       .then(data =>
         setRelatedCars(
-          data.filter((c: any) => String(c.id) !== String(id)).slice(0, 3)
+          data.filter((c: DetailsCar) => String(c.id) !== String(id)).slice(0, 3)
         )
       )
       .catch(() => {});

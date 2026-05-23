@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Clock,
@@ -15,7 +15,6 @@ import {
   AlertCircle,
   ChevronDown,
   ChevronUp,
-  X,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -40,7 +39,40 @@ function statusColor(status: string) {
   }
 }
 
-function mapBooking(b: any) {
+interface ApiBooking {
+  id: number;
+  status: string;
+  total_price: string | number;
+  start_date: string;
+  end_date: string;
+  car?: {
+    id: number;
+    brand: string;
+    model: string;
+    price_per_day: string;
+    fuel_type: string;
+    image_path: string | null;
+  };
+}
+
+interface UserBooking {
+  id: number;
+  status: string;
+  total: string | number;
+  startDate: string;
+  endDate: string;
+  car: {
+    id: number;
+    name: string;
+    brand: string;
+    model: string;
+    price: number;
+    fuelType: string;
+    imagePath: string | null;
+  };
+}
+
+function mapBooking(b: ApiBooking): UserBooking {
   return {
     id: b.id,
     status: b.status.charAt(0).toUpperCase() + b.status.slice(1),
@@ -48,7 +80,7 @@ function mapBooking(b: any) {
     startDate: b.start_date ? b.start_date.split('T')[0] : '',
     endDate: b.end_date ? b.end_date.split('T')[0] : '',
     car: {
-      id: b.car?.id,
+      id: b.car?.id || 0,
       name: b.car ? `${b.car.brand} ${b.car.model}` : 'Unknown Car',
       brand: b.car?.brand ?? '',
       model: b.car?.model ?? '',
@@ -61,7 +93,7 @@ function mapBooking(b: any) {
 
 // ── Booking Card ─────────────────────────────────────────────────────────────
 
-function BookingCard({ booking }: { booking: any }) {
+function BookingCard({ booking }: { booking: UserBooking }) {
   const [expanded, setExpanded] = useState(false);
   const carImg = booking.car.imagePath || getCarImage(booking.car.brand, booking.car.model);
 
@@ -193,7 +225,7 @@ export default function UserProfile() {
   const [activeTab, setActiveTab] = useState('bookings');
 
   // Bookings
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<UserBooking[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [bookingFilter, setBookingFilter] = useState('all');
 

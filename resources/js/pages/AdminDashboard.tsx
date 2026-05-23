@@ -10,7 +10,6 @@ import {
   Search,
   Filter,
   Plus,
-  Download,
   Calendar,
   Activity,
   Edit2,
@@ -19,6 +18,45 @@ import {
   X,
   Check
 } from 'lucide-react';
+
+interface DashboardCar {
+  id: number;
+  brand: string;
+  model: string;
+  name: string;
+  year: number;
+  price_per_day: string | number;
+  price: number;
+  fuel_type: string;
+  fuelType?: string;
+  passenger_capacity: number;
+  passengers?: number;
+  luggage_capacity: string | number;
+  status: string;
+  category: string;
+  type?: string;
+  image_path: string | null;
+  image: string;
+}
+
+interface DashboardBooking {
+  id: number;
+  user_id: number;
+  total_price: string | number;
+  status: string;
+  created_at: string;
+  start_date: string;
+  end_date: string;
+  user?: {
+    name: string;
+    email: string;
+  };
+  car?: {
+    brand: string;
+    model: string;
+    image_path?: string | null;
+  };
+}
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -53,22 +91,10 @@ ChartJS.register(
 export default function AdminDashboard() {
   const { user, token } = useAuth();
 
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="h-[75vh] w-full flex items-center justify-center bg-[#050505] text-white">
-        <div className="text-center px-4">
-          <Activity className="w-12 h-12 text-cyan-500 animate-pulse mx-auto mb-6" />
-          <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-2">Restricted Access</h2>
-          <p className="text-gray-500 text-sm max-w-xs mx-auto">You do not have administrative privileges to access this area.</p>
-        </div>
-      </div>
-    );
-  }
-
   // Modals state
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedCar, setSelectedCar] = useState<any>(null);
+  const [selectedCar, setSelectedCar] = useState<DashboardCar | null>(null);
 
   // Form fields state
   const [brand, setBrand] = useState('');
@@ -83,8 +109,8 @@ export default function AdminDashboard() {
   const [category, setCategory] = useState('');
 
   // Backend state
-  const [cars, setCars] = useState<any[]>([]);
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [cars, setCars] = useState<DashboardCar[]>([]);
+  const [bookings, setBookings] = useState<DashboardBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -128,7 +154,7 @@ export default function AdminDashboard() {
     fetch('/api/cars?status=all')
       .then(res => res.json())
       .then(carsData => {
-        const mapped = carsData.map((c: any) => {
+        const mapped = carsData.map((c: DashboardCar) => {
           return {
             ...c,
             name: c.model,
@@ -159,6 +185,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   // Handle Add Car
@@ -203,7 +230,7 @@ export default function AdminDashboard() {
   };
 
   // Handle Edit Click
-  const handleEditClick = (car: any) => {
+  const handleEditClick = (car: DashboardCar) => {
     setSelectedCar(car);
     setBrand(car.brand);
     setModel(car.name);
@@ -434,6 +461,18 @@ export default function AdminDashboard() {
     }
   };
 
+  if (!user || user.role !== 'admin') {
+    return (
+      <div className="h-[75vh] w-full flex items-center justify-center bg-[#050505] text-white">
+        <div className="text-center px-4">
+          <Activity className="w-12 h-12 text-cyan-500 animate-pulse mx-auto mb-6" />
+          <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-2">Restricted Access</h2>
+          <p className="text-gray-500 text-sm max-w-xs mx-auto">You do not have administrative privileges to access this area.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex bg-[#050505] min-h-screen">
       {/* Admin Sidebar */}
@@ -451,7 +490,7 @@ export default function AdminDashboard() {
             ].map(item => (
               <button 
                 key={item.id}
-                onClick={() => setActiveTab(item.id as any)}
+                onClick={() => setActiveTab(item.id as 'overview' | 'rentals' | 'fleet')}
                 className={cn(
                   "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-widest transition-all text-left",
                   activeTab === item.id 
@@ -514,7 +553,7 @@ export default function AdminDashboard() {
           ].map(item => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
+              onClick={() => setActiveTab(item.id as 'overview' | 'rentals' | 'fleet')}
               className={cn(
                 "flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shrink-0 border",
                 activeTab === item.id

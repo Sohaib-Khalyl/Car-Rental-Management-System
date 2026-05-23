@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Lock, Mail, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { cn } from '../lib/utils';
 
 export default function AuthModal() {
   const { showAuthModal, setShowAuthModal, login } = useAuth();
@@ -41,8 +40,8 @@ export default function AuthModal() {
 
       login(data.user, data.token);
       setShowAuthModal(false);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Authentication failed');
     } finally {
       setLoading(false);
     }

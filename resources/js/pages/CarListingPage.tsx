@@ -17,6 +17,20 @@ import { getCarImage } from '../lib/carImages';
 
 
 
+interface ListingCar {
+  id: number;
+  name: string;
+  brand: string;
+  type: string;
+  price: number;
+  fuelType: string;
+  passengers: number;
+  transmission: string;
+  rating: number;
+  status: string;
+  image: string;
+}
+
 export default function CarListingPage() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -26,14 +40,25 @@ export default function CarListingPage() {
 
   const carTypes = ['Any', 'Economic', 'Compact', 'Sedan', 'SUV', 'Automatic', '7 seter car'];
 
-  const [cars, setCars] = useState<any[]>([]);
+  const [cars, setCars] = useState<ListingCar[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/cars')
       .then(res => res.json())
       .then(data => {
-        const mapped = data.map((c: any) => ({
+        const mapped = data.map((c: {
+          id: number;
+          model: string;
+          brand: string;
+          category: string;
+          price_per_day: string;
+          fuel_type: string;
+          passenger_capacity: number;
+          status: string;
+          image_path: string | null;
+          description?: string;
+        }) => ({
           id: c.id,
           name: c.model,
           brand: c.brand,

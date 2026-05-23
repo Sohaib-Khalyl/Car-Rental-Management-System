@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { 
   ArrowRight, 
   ShieldCheck, 
-  Zap, 
   MapPin, 
   Calendar,
   Search,
@@ -15,8 +14,18 @@ import {
   Star
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { cn } from '../lib/utils';
 import { getCarImage } from '../lib/carImages';
+
+interface LandingCar {
+  id: number;
+  name: string;
+  brand: string;
+  price: number;
+  fuelType: string;
+  passengers: number;
+  transmission: string;
+  image: string;
+}
 
 export default function LandingPage() {
   const { t } = useTranslation();
@@ -24,7 +33,7 @@ export default function LandingPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Any');
-  const [featuredCars, setFeaturedCars] = useState<any[]>([]);
+  const [featuredCars, setFeaturedCars] = useState<LandingCar[]>([]);
   const [totalCars, setTotalCars] = useState<number | null>(null);
 
   useEffect(() => {
@@ -32,7 +41,16 @@ export default function LandingPage() {
       .then(res => res.json())
       .then(data => {
         setTotalCars(data.length);
-        const mappedCars = data.map((c: any) => ({
+        const mappedCars = data.map((c: {
+          id: number;
+          model: string;
+          brand: string;
+          price_per_day: string;
+          fuel_type: string;
+          passenger_capacity: number;
+          image_path: string | null;
+          description?: string;
+        }) => ({
           id: c.id,
           name: c.model,
           brand: c.brand,
